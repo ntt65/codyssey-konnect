@@ -171,7 +171,9 @@ Naito 답변을 써도 현재 검색 임베딩은 OpenAI 키가 필요하다. Na
 - [ ] 새 clone·다른 팀원 PC 재현
 - [ ] Vercel·Render 배포·연결 검증
 
-기존 오류 처리 58개에 환경 프로필 테스트를 더해 기본 백엔드 67개가 되었다. 표준 루트 `.venv`·Python 3.12.13·`uv.lock`으로 재검증했고, 별도 미커밋 테스트 4개가 있는 현재 작업 트리에서는 71개가 통과했다. 원래 깨진 환경은 `.cache/venv-original-20261030`에 보존했다. 권한이 제한된 환경에서는 저장소 내부의 새로운 임시 폴더를 지정한다. 새 clone·다른 OS·팀원 PC·실제 연결 검증은 별도이며 Starlette·python-jose deprecation 경고가 남아 있다.
+기존 오류 처리·환경 프로필에 `c521f54`의 KONNECT 비교를 포함해 백엔드 71개·프론트 7개가 통과했다. 표준 루트 `.venv`·Python 3.12.13·`uv.lock` 및 `d46f82c`의 새 Windows 로컬 clone에서 모두 확인했다. 새 clone에는 `.env`·기존 `.venv`가 없었고 기존 uv 패키지 캐시만 재사용해 잠금 설치·자동 smoke를 확인했다. 원래 깨진 환경은 `.cache/venv-original-20261030`에 보존했다. 제한 환경의 pytest 임시 경로는 부모 폴더를 먼저 만든 뒤 지정한다. 다른 OS·팀원 PC·실제 연결은 별도이며 deprecation 경고 6개가 남아 있다.
+
+KONNECT 재사용 시 출처 메타데이터(`doc_title`·`section` 대 현재 `source`), 익명 로그인 보존 정책, `Trace.step` 호출 형태의 차이를 확인한다. 기존 컬렉션을 그대로 쓰면 `unknown` 출처가 나올 수 있다. [체크리스트의 비교 기록](./준비체크리스트.md#konnect-참조-비교-검증--2026-10-30)을 참고하며 실제 외부 서비스 호환성 검증으로 간주하지 않는다.
 
 의존성은 `pyproject.toml`·`uv.lock`, Python은 `.python-version`을 기준으로 한다. pip·Render 파일은 잠금에서 생성하고 CI에서 불일치를 검사한다. Windows·macOS·Linux CI를 작성했지만 원격 실행 성공은 push 이후에 확인한다. 키 없이 `verify_dev.py`로 홈페이지·자산·헬스·API를 검사할 수 있으며 실제 자료·질문 준비는 RAG 안내를 따른다.
 
