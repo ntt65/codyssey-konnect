@@ -30,6 +30,7 @@ async def fetch_items(param: str) -> list[dict]:
         except httpx.HTTPStatusError as e:
             raise ExternalSourceError(f"[SOURCE_NAME] HTTP {e.response.status_code}")
         except Exception as e:
-            raise ExternalSourceError(f"[SOURCE_NAME] error: {e}")
+            # Raw exception strings may contain URLs with credentials or API keys.
+            raise ExternalSourceError("[SOURCE_NAME] 조회에 실패했습니다. 연결 설정을 확인해 주세요.") from e
 
     return []

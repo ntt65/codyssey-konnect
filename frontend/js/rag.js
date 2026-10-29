@@ -1,3 +1,5 @@
+import { requestJSON, formatApiError } from "./http.js";
+
 const form = document.getElementById("ask-form");
 const question = document.getElementById("question");
 const messages = document.getElementById("messages");
@@ -37,18 +39,12 @@ form.addEventListener("submit", async (event) => {
   question.disabled = true;
   status.textContent = "관련 자료를 찾고 답변을 준비하고 있어요…";
   messages.setAttribute("aria-busy", "true");
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 90000);
   try {
-    const response = await fetch(apiBase + "/api/ask", {
+    const result = await requestJSON(apiBase + "/api/ask", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ question: value }),
-      signal: controller.signal,
     });
-    const envelope = await response.json();
-    if (!response.ok || !envelope.ok) throw new Error(envelope.error?.message || "질문을 처리하지 못했습니다.");
-    const result = envelope.data;
     const article = message("assistant", result.answer);
     if (result.citations.length) {
       const details = document.createElement("details");
@@ -67,12 +63,9 @@ form.addEventListener("submit", async (event) => {
     question.value = "";
     status.textContent = result.grounded ? "답변에 사용한 참고 자료를 확인해 보세요." : "관련 자료를 등록한 뒤 다시 질문해 주세요.";
   } catch (error) {
-    const text = error.name === "AbortError" ? "응답 시간이 길어지고 있습니다. 잠시 후 다시 질문해 주세요." :
-      error instanceof TypeError ? "서버에 연결하지 못했습니다. 연결 상태를 확인해 주세요." : error.message;
-    message("assistant", text, true);
+    message("assistant", formatApiError(error), true);
     status.textContent = "질문을 보내지 못했습니다. 다시 시도해 주세요.";
   } finally {
-    clearTimeout(timer);
     messages.removeAttribute("aria-busy");
     send.disabled = false;
     clear.disabled = false;

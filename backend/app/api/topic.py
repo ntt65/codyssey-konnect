@@ -7,11 +7,12 @@ project you would replace the dummy data with calls to your RAG / LLM pipeline.
 
 from fastapi import APIRouter
 from app.models.topic import DiscoverRequest, DiscoverResponse, Candidate, ResultStatus
+from app.models.common import Envelope
 
 router = APIRouter(prefix="/api/topic", tags=["Topic"])
 
-@router.post("/discover", response_model=DiscoverResponse)
-def discover(request: DiscoverRequest) -> DiscoverResponse:
+@router.post("/discover", response_model=Envelope[DiscoverResponse])
+def discover(request: DiscoverRequest) -> Envelope[DiscoverResponse]:
     """Return a static example response.
 
     Args:
@@ -28,4 +29,4 @@ def discover(request: DiscoverRequest) -> DiscoverResponse:
         price="free",
         location="Seoul",
     )
-    return DiscoverResponse(candidates=[dummy_candidate], total=1)
+    return Envelope.ok_response(DiscoverResponse(candidates=[dummy_candidate], total=1))

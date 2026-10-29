@@ -62,7 +62,37 @@ Core 변경도 요청 범위에 포함되면 영향과 검증 방법을 밝히�
 
 `AppError.message`는 공개 문구다. 키·토큰·DB 주소·원본 외부 응답·`str(exc)`를 넣지 않는다. 원인은 `raise ExternalSourceError("안전한 안내") from exc`로 연결한다.
 
-현재 요청 ID·검증 항목 안내·안전한 로그·프론트 통신 공통화 보강이 진행 중이다. 이 문서 통합 시점에는 회귀 검증이 끝나지 않았으며 완료로 체크하지 않는다. Topic 응답과 기존 `api.js`의 불일치도 그 작업에서 해결한다.
+현재 기능 API인 `/api/ask`와 `/api/topic/discover`는 같은 Envelope 계약을 사용한다. 404·405·요청 검증·공통 예외·예상하지 못한 서버 오류도 Envelope로 반환한다. 정적 파일은 `/css`·`/js`에만 마운트하고 홈페이지·Topic 데모를 명시적으로 제공해 API의 405가 정적 파일 404에 가려지지 않게 한다. 새 정적 자산 폴더·HTML 화면은 `main.py`에 명시적으로 등록한다.
+
+### 개발자가 오류를 확인하는 순서
+
+1. 화면 안내의 **요청 ID** 또는 Network의 `X-Request-ID`를 복사한다. 서버가 생성한 ID이며 클라이언트 입력을 그대로 사용하지 않는다.
+2. 같은 ID를 서버 로그에서 검색한다. `code`, `status`, 라우트, 원인 예외 유형, `파일:줄:함수` 위치, 경과시간을 확인한다.
+3. 422라면 `error.issues`의 필드·유형·안내를 확인한다. 원본 입력이나 Pydantic 내부 오류 객체를 복사해 로그에 남기지 않는다.
+4. 아래 원인별 조치를 적용하고 같은 작업을 다시 실행한다. 응답 메시지만 바꾸어 오류를 감추지 않는다.
+
+```json
+{"ok": false, "data": null, "error": {"code": "ValidationError", "message": "입력값을 확인해 주세요.", "issues": [{"field": "body.question", "code": "string_too_long", "message": "입력값이 너무 깁니다."}]}, "request_id": "서버가 생성한 ID"}
+```
+
+| 확인한 값 | 조치 |
+|---|---|
+| `ValidationError` / 422 | 지정 필드·JSON 형식·길이·범위를 확인 |
+| `HTTP404` / 404 | 호출 경로와 API 기본 주소 확인 |
+| `HTTP405` / 405 | HTTP 메서드와 `Allow` 헤더 확인 |
+| `AuthError` / 401 | 재로그인, 실제 서명 방식·issuer·audience·키 갱신 확인 |
+| `ConfigurationError` / 500 | 안내된 설정 이름 확인. 값은 공유하지 않음 |
+| `ExternalSourceError` / 503 | 원인 유형으로 인증 서버·DB·임베딩·LLM의 연결·키·상태 확인 |
+| `InternalServerError` / 500 | 같은 요청 ID의 파일·줄과 원인 유형을 따라 서버 로직·출력 스키마 수정 |
+| 프론트 `InvalidResponse` | HTML 프록시 오류·잘못된 API 주소·Envelope 위반 확인 |
+| 프론트 `NetworkError` | 서버 실행·주소·CORS·네트워크 확인 |
+| 프론트 `RequestTimeout` / `RequestCancelled` | 지연과 사용자 취소를 구분. 자동 중복 호출하지 않음 |
+
+프론트는 `js/http.js`의 `requestJSON`·`ApiError`·`formatApiError`를 공유한다. RAG는 직접 사용하고 인증이 필요한 기능은 `api.js`를 통해 JWT를 부착한다. 개발자 콘솔에는 코드·상태·요청 ID만 남긴다. 문구는 `textContent`로 표시한다.
+
+서버의 `core/errors.py`는 원본 질문·본문·인증 헤더·쿼리·외부 응답·원본 예외 메시지를 기록하지 않는다. 원인 유형과 코드 위치만 남기므로 `raise ... from exc`를 사용한다. AppError 공개 문구의 안전성은 작성자가 책임진다. HTTPException의 raw detail은 공개하지 않는다. CORS 오류 응답에서도 요청 ID를 읽을 수 있게 노출한다.
+
+기본 접근 로그의 URL·쿼리를 피하도록 시작 명령에 `--no-access-log`를 사용한다. 이미 전송을 시작한 스트리밍 응답·백그라운드 작업의 오류는 응답을 새 JSON으로 바꿀 수 없으며 향후 해당 기능을 추가할 때 별도 처리가 필요하다. 현재 RAG는 비스트리밍 응답이다.
 
 ## 4. RAG 동작과 제약
 
@@ -121,7 +151,7 @@ Naito 답변을 써도 현재 검색 임베딩은 OpenAI 키가 필요하다. Na
 ## 7. 인증·Trace·화면 확장
 
 - 인증 코드는 있지만 RAG 홈페이지에는 연결되지 않았다. `signInWithOAuth` 존재만으로 익명 사용자 Identity Linking·동일 user_id 보존이 검증됐다고 보지 않는다.
-- JWT 알고리즘·issuer·audience·키 갱신을 실제 Supabase 설정과 맞춰 검증한다. 인증 보강도 현재 오류 처리 작업에서 검증 중이다.
+- JWT는 RS256·ES256 비대칭 서명, 프로젝트 issuer, `aud=authenticated`, 만료·필수 claim을 검사한다. 알 수 없는 kid는 키를 한 번 새로 가져와 확인하고 임의의 첫 키로 대체하지 않는다. 기존 HS256 공유 시크릿은 이 JWKS 경로로 지원하지 않는다. 실제 Supabase 설정과 맞춰 연결 검증해야 한다. [Supabase 서명 키 안내](https://supabase.com/docs/guides/auth/signing-keys)
 - `Trace.step()`은 단계·경과시간·데이터를 기록하고 `to_dict()`는 리스트를 반환한다. 운영 trace 자동 숨김은 구현 완료로 주장하지 않는다. 민감 데이터를 공개 응답에 넣지 않는다.
 - 화면은 idle·loading·success·empty·error를 구분하고 중복 전송 방지·재시도를 제공한다.
 - `content.js`에는 설정·문구만 둔다. 현재 RAG 문구는 별도로 있으므로 실제 수정 대상을 먼저 확인한다.
@@ -134,14 +164,14 @@ Naito 답변을 써도 현재 검색 임베딩은 OpenAI 키가 필요하다. Na
 - [x] DB 미설정·근거 없음·외부 장애 구분 구현
 - [x] 기존 Core·RAG 29개 통과 기록 확인 — [과거 기록](./rag_work_report.md)
 - [x] 설계·워크플로·경량화 계획을 이 문서로 통합
-- [ ] 오류 처리 보강과 현재 전체 테스트 회귀 검증 완료
+- [x] 오류 처리 보강과 회귀 검증 — 백엔드 58개·프론트 통신 7개 통과
 - [ ] 실제 적재 → 질문 → 답변·출처 확인
 - [ ] 브라우저 입력·오류·출처·좁은 화면 검증
 - [ ] Auth·Identity Linking 실제 검증 — 사용할 때 진행
 - [ ] 새 clone·다른 팀원 PC 재현
 - [ ] Vercel·Render 배포·연결 검증
 
-과거 29개는 루트 Topic 테스트까지 포함한 전체 결과가 아니다. 기존 `.venv`는 Python 경로가 끊겨 별도 `.cache/test-venv`로 검증 중이다. 공용 환경 복구 완료와 구분한다.
+과거 29개와 달리 현재 백엔드 58개에는 루트 Topic·공통 오류·JWT·제공자 설정 테스트도 포함한다. Python 3.12.13의 별도 `.cache/test-venv`에서 검증했으며 기존 `.venv`는 보존했다. 서버 임시 경로 권한 때문에 `-p no:cacheprovider --basetemp .cache/pytest-errors-run1`을 사용했다. 새 clone·팀원 PC와 실제 연결 검증은 별도다. Starlette·python-jose의 deprecation 경고가 남아 있다.
 
 ## 9. 문서 사용과 갱신
 

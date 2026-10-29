@@ -3,6 +3,8 @@
  * JWT 자동 부착, Envelope 파싱, 오류 throw
  */
 import { getToken } from "./auth.js";
+import { ApiError, requestJSON } from "./http.js";
+export { ApiError, formatApiError } from "./http.js";
 
 const _BASE = (() => {
   const h = window.location.hostname;
@@ -16,29 +18,24 @@ const _BASE = (() => {
  * @returns {Promise<any>} Envelope.data
  */
 export async function request(path, options = {}) {
-  const token = await getToken();
+  let token;
+  try {
+    token = await getToken();
+  } catch {
+    throw new ApiError("로그인 상태를 확인하지 못했습니다. 다시 로그인해 주세요.", { code: "AuthSessionError" });
+  }
   const headers = {
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(options.headers ?? {}),
   };
 
-  const res = await fetch(`${_BASE}${path}`, {
+  return requestJSON(`${_BASE}${path}`, {
     ...options,
     headers,
     body: options.body ? JSON.stringify(options.body) : undefined,
   });
 
-  const envelope = await res.json();
-
-  if (!envelope.ok) {
-    const err = new Error(envelope.error?.message ?? "Request failed");
-    err.code = envelope.error?.code;
-    err.status = res.status;
-    throw err;
-  }
-
-  return envelope.data;
 }
 
 // ── 편의 함수 ──────────────────────────────────────

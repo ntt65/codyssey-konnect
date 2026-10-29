@@ -1,5 +1,9 @@
 class AppError(Exception):
-    """공통 베이스 예외. main.py 핸들러가 Envelope(ok=False)로 변환."""
+    """Expected failure. message is PUBLIC: never put keys, raw exceptions or data here.
+
+    Raise with ``raise ExternalSourceError("safe guidance") from exc`` to keep the
+    cause type and frame available in request-ID diagnostics without leaking values.
+    """
     def __init__(self, message: str, status_code: int = 500):
         self.message = message
         self.status_code = status_code

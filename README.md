@@ -8,8 +8,7 @@ Git과 [uv](https://docs.astral.sh/uv/getting-started/installation/)를 설치�
 
 ```text
 uv venv --python 3.12 .venv
-uv pip install --python .venv -r backend/requirements.txt
-uv pip install --python .venv pytest==8.3.5 pytest-asyncio==0.25.3
+uv pip install --python .venv -r backend/requirements-dev.txt
 ```
 
 다른 PC의 Python 경로를 참조하는 기존 `.venv`는 재사용하지 않습니다. 필요한 로컬 설정을 보존하고 새 환경을 준비하세요. 전체 의존성 잠금과 깨끗한 clone 재현은 후속 작업입니다.
@@ -33,7 +32,7 @@ test -e .env || cp .env.example .env
 저장소 루트에서 실행합니다. FastAPI가 홈페이지도 제공하므로 별도 프론트 서버가 필요 없습니다. 가상환경을 활성화하지 않아도 됩니다.
 
 ```text
-uv run --no-project --python .venv python -m uvicorn app.main:app --app-dir backend --reload --port 8000
+uv run --no-project --python .venv python -m uvicorn app.main:app --app-dir backend --reload --no-access-log --port 8000
 ```
 
 - 홈페이지: http://localhost:8000
@@ -45,7 +44,13 @@ uv run --no-project --python .venv python -m uvicorn app.main:app --app-dir back
 uv run --no-project --python .venv python -m pytest -q
 ```
 
-모의 테스트와 실제 서비스·브라우저 검증을 구분합니다. 오류 처리 보강과 테스트 설정을 정리 중이므로 현재 상태는 [체크리스트](framework_doc/준비체크리스트.md)를 확인하세요. 기존 `setup_dev.py`의 `.env`·필수 키 판정은 후속 수정 대상이며 시작 필수 절차가 아닙니다.
+프론트 공통 통신 모듈은 Node.js 18 이상에서 외부 라이브러리 없이 검증합니다.
+
+```text
+node --test tests/frontend/http.test.mjs
+```
+
+현재 별도 검증 환경(Python 3.12.13)에서 백엔드 58개·프론트 통신 7개 테스트를 통과했습니다. 실제 서비스·브라우저·팀원 PC 재현과 구분합니다. 오류 확인 방법은 [개발자 오류 가이드](framework_doc/framework.md#3-api와-오류-계약)를 참고하세요. `--no-access-log`는 URL·쿼리가 찍히는 Uvicorn 기본 접근 로그 대신 앱의 요청 ID·라우트·상태·시간 로그를 사용합니다. 기존 `setup_dev.py`의 `.env`·필수 키 판정은 후속 수정 대상이며 시작 필수 절차가 아닙니다.
 
 ## 문서
 
