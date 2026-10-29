@@ -171,7 +171,9 @@ Naito 답변을 써도 현재 검색 임베딩은 OpenAI 키가 필요하다. Na
 - [ ] 새 clone·다른 팀원 PC 재현
 - [ ] Vercel·Render 배포·연결 검증
 
-과거 29개와 달리 현재 백엔드 58개에는 루트 Topic·공통 오류·JWT·제공자 설정 테스트도 포함한다. Python 3.12.13의 별도 `.cache/test-venv`에서 검증했으며 기존 `.venv`는 보존했다. 서버 임시 경로 권한 때문에 `-p no:cacheprovider --basetemp .cache/pytest-errors-run1`을 사용했다. 새 clone·팀원 PC와 실제 연결 검증은 별도다. Starlette·python-jose의 deprecation 경고가 남아 있다.
+기존 오류 처리 58개에 환경 프로필 테스트를 더해 기본 백엔드 67개가 되었다. 표준 루트 `.venv`·Python 3.12.13·`uv.lock`으로 재검증했고, 별도 미커밋 테스트 4개가 있는 현재 작업 트리에서는 71개가 통과했다. 원래 깨진 환경은 `.cache/venv-original-20261030`에 보존했다. 권한이 제한된 환경에서는 저장소 내부의 새로운 임시 폴더를 지정한다. 새 clone·다른 OS·팀원 PC·실제 연결 검증은 별도이며 Starlette·python-jose deprecation 경고가 남아 있다.
+
+의존성은 `pyproject.toml`·`uv.lock`, Python은 `.python-version`을 기준으로 한다. pip·Render 파일은 잠금에서 생성하고 CI에서 불일치를 검사한다. Windows·macOS·Linux CI를 작성했지만 원격 실행 성공은 push 이후에 확인한다. 키 없이 `verify_dev.py`로 홈페이지·자산·헬스·API를 검사할 수 있으며 실제 자료·질문 준비는 RAG 안내를 따른다.
 
 ## 9. 문서 사용과 갱신
 

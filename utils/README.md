@@ -23,6 +23,8 @@ utils/
 | 파일 | 용도 |
 |---|---|
 | `scripts/setup_dev.py` | 앱과 같은 루트 .env를 읽어 basic·ingest·rag·llm·auth 설정을 값·외부 호출 없이 점검 |
+| `scripts/verify_dev.py` | 실제 RAG 저장소를 꺼 키 없이 홈페이지·자산·헬스·API 계약 확인 |
+| `scripts/sync_requirements.py` | uv.lock에서 pip·Render 호환 파일 생성, --check로 불일치 검사 |
 | `scripts/ingest_rag.py` | RAG 지식 문서 → pgvector 적재 (SUPABASE_DB_URL 필요) |
 | `templates/source_template.py` | 외부 API 클라이언트 템플릿 |
 | `templates/domain_template.py` | 판정 로직 모듈 템플릿 |

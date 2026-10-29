@@ -28,9 +28,9 @@ Supabase Auth 설정은 이 RAG 데모의 질문 API에는 필요하지 않습�
 2. 저장소 루트에서 아래 명령을 실행합니다.
 
 ```powershell
-uv run --no-project --python .venv python utils/scripts/ingest_rag.py
+uv run --locked python utils/scripts/ingest_rag.py
 # 다른 폴더 사용
-uv run --no-project --python .venv python utils/scripts/ingest_rag.py "D:/my documents"
+uv run --locked python utils/scripts/ingest_rag.py "D:/my documents"
 ```
 
 PDF·Word는 텍스트 또는 Markdown으로 변환한 뒤 넣습니다.
@@ -59,3 +59,5 @@ grounded는 검색 근거가 제공됐다는 의미이며, 답변의 모든 문�
 모의 테스트는 [README](../README.md)의 전체 테스트 명령을 사용합니다. 외부 DB·LLM 비용 없이 검증하며 실제 연결 성공과 구분합니다.
 
 실제 연결 검증은 키 설정 → 자료 적재 → 답이 있는 질문/없는 질문을 보내 출처를 확인하는 순서입니다.
+
+검증용 자료·질문은 `tests/fixtures/rag/demo_manual.md`와 `questions.json`에 준비되어 있습니다. 기본 지식 폴더 밖에 있어 자동 적재되지 않습니다. 실제 키·DB 사용 합의 후 검증 전용 `RAG_COLLECTION`을 지정하고 위 적재 명령에 `tests/fixtures/rag` 경로를 전달하세요. 모의 자료를 실제 앱 자료와 섞지 않습니다. 질문별 기대 조건을 확인하며 근거 없는 가격·정책을 만들지 않는지도 봅니다. 이 자료를 준비한 것과 실제 적재·답변 성공은 구분합니다.

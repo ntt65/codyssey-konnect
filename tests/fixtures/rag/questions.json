@@ -1,0 +1,12 @@
+[
+  {
+    "question": "이 모의 프로젝트의 식별자와 자료 담당 부서는 무엇인가요?",
+    "expect": "DEMO-678과 문서검증팀을 답하고 demo_manual.md를 출처로 표시",
+    "evidence": "demo_manual.md"
+  },
+  {
+    "question": "이 프로젝트의 이용 가격과 환불 조건은 무엇인가요?",
+    "expect": "자료에 가격·환불 조건이 없다고 안내하며 임의로 금액이나 정책을 만들지 않음. 검색 결과에 따라 no_evidence 또는 근거 부족을 명시한 answered 가능",
+    "evidence": null
+  }
+]

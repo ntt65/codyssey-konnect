@@ -15,10 +15,11 @@
 - 시작 시 `git status --short`로 기존 변경을 확인하고 보존한다. 실제 코드·심볼은 `rg`로 찾는다.
 - 모든 문서·인덱스·초기 참고 자료를 매번 읽지 않는다. 작업 관련 코드·테스트·계약만 확인한다.
 - 요청 범위의 Core 수정은 영향과 검증 방법을 밝히고 진행한다. Topic 호출부와 공통 계약을 보존한다.
-- Python 3.12와 저장소 루트 가상환경을 사용한다. 키·실서비스 없이 모의 테스트를 실행한다.
-- 백엔드: `uv run --no-project --python .venv python -m pytest -q`.
+- `.python-version`·`uv.lock`과 루트 `.venv`를 사용한다. 설치는 `uv sync --locked`. 키·실서비스 없이 모의 테스트를 실행한다.
+- 백엔드: `uv run --locked python -m pytest -q`.
 - 프론트 통신: `node --test tests/frontend/http.test.mjs` (Node.js 18 이상).
 - 의미 있는 변경은 관련 테스트로 검증한다. 이미 통과한 검사를 이유 없이 반복하지 않는다.
+- 의존성은 `pyproject.toml`·`uv.lock`에서 관리한다. pip 호환 파일은 `uv run --locked python utils/scripts/sync_requirements.py`로 생성한다.
 - 구현·모의 테스트·실제 DB/LLM 연결·브라우저·팀원 PC 재현을 구분한다. 미검증을 완료로 체크하지 않는다.
 
 ## 구현 계약

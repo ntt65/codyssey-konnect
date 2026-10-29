@@ -4,14 +4,13 @@ FastAPI + Vanilla JS + LangChain + Supabase pgvector 기반 자료 질문·답�
 
 ## 시작하기
 
-Git과 [uv](https://docs.astral.sh/uv/getting-started/installation/)를 설치하고 clone한 폴더에서 실행합니다. PowerShell·macOS·Linux 공통 명령이며 uv가 Python 3.12와 루트 가상환경을 준비합니다.
+Git과 [uv](https://docs.astral.sh/uv/getting-started/installation/)를 설치하고 clone한 폴더에서 실행합니다. PowerShell·macOS·Linux 공통 명령이며 `.python-version`의 Python 3.12.13과 `uv.lock`의 전체 의존성으로 루트 `.venv`를 준비합니다. uv 0.11.5에서 검증했습니다.
 
 ```text
-uv venv --python 3.12 .venv
-uv pip install --python .venv -r backend/requirements-dev.txt
+uv sync --locked
 ```
 
-다른 PC의 Python 경로를 참조하는 기존 `.venv`는 재사용하지 않습니다. 필요한 로컬 설정을 보존하고 새 환경을 준비하세요. 전체 의존성 잠금과 깨끗한 clone 재현은 후속 작업입니다.
+다른 PC의 `.venv`를 복사하지 않습니다. 기존 환경이 깨졌다면 필요한 로컬 설정을 보존하고 해당 폴더를 별도로 옮긴 뒤 `uv sync --locked`로 만듭니다. 이 PC의 기존 환경은 `.cache/venv-original-20261030`에 보존하고 표준 `.venv`를 복구했습니다.
 
 `.env`가 없을 때만 예시를 복사합니다. 기존 파일을 덮어쓰지 않습니다.
 
@@ -32,7 +31,7 @@ test -e .env || cp .env.example .env
 저장소 루트에서 실행합니다. FastAPI가 홈페이지도 제공하므로 별도 프론트 서버가 필요 없습니다. 가상환경을 활성화하지 않아도 됩니다.
 
 ```text
-uv run --no-project --python .venv python -m uvicorn app.main:app --app-dir backend --reload --no-access-log --port 8000
+uv run --locked python -m uvicorn app.main:app --app-dir backend --reload --no-access-log --port 8000
 ```
 
 - 홈페이지: http://localhost:8000
@@ -41,7 +40,7 @@ uv run --no-project --python .venv python -m uvicorn app.main:app --app-dir back
 - Topic 예시: http://localhost:8000/topic_demo.html — 정적 예시 데이터
 
 ```text
-uv run --no-project --python .venv python -m pytest -q
+uv run --locked python -m pytest -q
 ```
 
 프론트 공통 통신 모듈은 Node.js 18 이상에서 외부 라이브러리 없이 검증합니다.
@@ -53,13 +52,29 @@ node --test tests/frontend/http.test.mjs
 설정 점검은 앱과 같은 루트 `.env`와 프로세스 환경변수를 사용합니다. 기본 명령은 DB가 없으면 키 없는 화면 실행을, DB가 있으면 RAG 설정을 검사합니다. 필요한 기능을 명시할 수도 있습니다.
 
 ```text
-uv run --no-project --python .venv python utils/scripts/setup_dev.py
-uv run --no-project --python .venv python utils/scripts/setup_dev.py --feature rag
+uv run --locked python utils/scripts/setup_dev.py
+uv run --locked python utils/scripts/setup_dev.py --feature rag
+uv run --locked python utils/scripts/verify_dev.py
 ```
 
 프로필: `basic`(화면), `ingest`(적재), `rag`(검색·답변), `llm`(답변 제공자), `auth`(확장 인증). 종료코드 0은 설정 준비, 1은 누락·기본 형식 오류, 2는 설정 타입·의존성 오류입니다. 값은 출력하지 않으며 실제 DB·LLM 접속은 하지 않습니다.
 
-현재 별도 검증 환경(Python 3.12.13)에서 백엔드 67개·프론트 통신 7개 테스트를 통과했습니다. 실제 서비스·브라우저·팀원 PC 재현과 구분합니다. 오류 확인 방법은 [개발자 오류 가이드](framework_doc/framework.md#3-api와-오류-계약)를 참고하세요. `--no-access-log`는 URL·쿼리가 찍히는 Uvicorn 기본 접근 로그 대신 앱의 요청 ID·라우트·상태·시간 로그를 사용합니다.
+표준 `.venv`·잠금 파일로 백엔드 기본 67개와 별도 미커밋 테스트 4개(작업 트리 합계 71개), 프론트 통신 7개가 통과했습니다. `verify_dev.py`는 로컬 키가 있어도 이 프로세스의 RAG 저장소를 꺼 실제 외부 호출 없이 홈페이지·자산·헬스·API 계약을 확인합니다. 실제 서비스·브라우저·팀원 PC 재현과 구분합니다. 오류 확인 방법은 [개발자 오류 가이드](framework_doc/framework.md#3-api와-오류-계약)를 참고하세요. `--no-access-log`는 URL·쿼리가 찍히는 Uvicorn 기본 접근 로그 대신 앱의 요청 ID·라우트·상태·시간 로그를 사용합니다.
+
+## 의존성 변경과 CI
+
+의존성 원본은 `pyproject.toml`, 전체 잠금은 `uv.lock`입니다. 직접 버전을 바꿀 때 아래 순서로 갱신합니다. `--locked` 실행은 잠금 파일을 몰래 바꾸지 않습니다.
+
+```text
+uv lock
+uv sync --locked
+uv run --locked python utils/scripts/sync_requirements.py
+uv run --locked python utils/scripts/sync_requirements.py --check
+```
+
+`backend/requirements.txt`와 `requirements-dev.txt`는 pip·Render 호환용 생성물입니다. 직접 수정하지 않습니다. 런타임 전용 환경은 `uv sync --locked --no-dev`로 설치합니다.
+
+`.github/workflows/ci.yml`은 Windows·macOS·Linux에서 잠금 설치, 생성물 일치, 기본 설정, 오프라인 앱 점검, 백엔드·프론트 테스트를 실행하도록 구성했습니다. 외부 API 키·배포 권한을 쓰지 않습니다. 워크플로 작성·로컬 명령 검증과 원격 GitHub Actions 성공은 별개이며, push 보류 상태에서는 원격 실행 결과가 없습니다.
 
 ## 문서
 

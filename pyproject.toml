@@ -1,0 +1,26 @@
+[project]
+name = "lab678-hackathon-framework"
+version = "0.1.0"
+description = "FastAPI and Vanilla JS document assistant for hackathons"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi==0.115.5",
+    "uvicorn[standard]==0.32.1",
+    "pydantic==2.10.3",
+    "pydantic-settings==2.6.1",
+    "httpx==0.27.0",
+    "python-jose[cryptography]==3.3.0",
+    "langchain==0.3.9",
+    "langchain-openai==0.2.10",
+    "langchain-core==0.3.21",
+    "openai==1.57.2",
+    "supabase==2.10.0",
+    "vecs==0.4.3",
+    "python-multipart==0.0.20",
+]
+
+[dependency-groups]
+dev = ["pytest==8.3.5", "pytest-asyncio==0.25.3"]
+
+[tool.uv]
+package = false
