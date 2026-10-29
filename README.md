@@ -190,6 +190,7 @@ templates 참조: `utils/templates/` · snippets 참조: `utils/snippets/`
 
 | 문서 | 내용 |
 |---|---|
+| `framework_doc/framework.md` | 프레임워크 통합 계획·구현 완료 상태·남은 검증 |
 | `framework_doc/framework_design.md` | 설계 명세 (계층·기능·원칙) |
 | `framework_doc/framework_workflow.md` | 작업 절차 (계획→실행→검증→보완) |
 | `framework_doc/tech.md` | 기술 스택 상세 (역할·버전·공식 문서·위치) |
