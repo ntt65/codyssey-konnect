@@ -50,7 +50,16 @@ uv run --no-project --python .venv python -m pytest -q
 node --test tests/frontend/http.test.mjs
 ```
 
-현재 별도 검증 환경(Python 3.12.13)에서 백엔드 58개·프론트 통신 7개 테스트를 통과했습니다. 실제 서비스·브라우저·팀원 PC 재현과 구분합니다. 오류 확인 방법은 [개발자 오류 가이드](framework_doc/framework.md#3-api와-오류-계약)를 참고하세요. `--no-access-log`는 URL·쿼리가 찍히는 Uvicorn 기본 접근 로그 대신 앱의 요청 ID·라우트·상태·시간 로그를 사용합니다. 기존 `setup_dev.py`의 `.env`·필수 키 판정은 후속 수정 대상이며 시작 필수 절차가 아닙니다.
+설정 점검은 앱과 같은 루트 `.env`와 프로세스 환경변수를 사용합니다. 기본 명령은 DB가 없으면 키 없는 화면 실행을, DB가 있으면 RAG 설정을 검사합니다. 필요한 기능을 명시할 수도 있습니다.
+
+```text
+uv run --no-project --python .venv python utils/scripts/setup_dev.py
+uv run --no-project --python .venv python utils/scripts/setup_dev.py --feature rag
+```
+
+프로필: `basic`(화면), `ingest`(적재), `rag`(검색·답변), `llm`(답변 제공자), `auth`(확장 인증). 종료코드 0은 설정 준비, 1은 누락·기본 형식 오류, 2는 설정 타입·의존성 오류입니다. 값은 출력하지 않으며 실제 DB·LLM 접속은 하지 않습니다.
+
+현재 별도 검증 환경(Python 3.12.13)에서 백엔드 67개·프론트 통신 7개 테스트를 통과했습니다. 실제 서비스·브라우저·팀원 PC 재현과 구분합니다. 오류 확인 방법은 [개발자 오류 가이드](framework_doc/framework.md#3-api와-오류-계약)를 참고하세요. `--no-access-log`는 URL·쿼리가 찍히는 Uvicorn 기본 접근 로그 대신 앱의 요청 ID·라우트·상태·시간 로그를 사용합니다.
 
 ## 문서
 

@@ -17,13 +17,12 @@ from app.api import health
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    missing = settings.missing_keys()
-    if missing:
-        logging.getLogger("uvicorn.error").warning("startup missing_config=%s provider=%s rag=%s",
-                                                  missing, settings.llm_provider, settings.rag_enabled)
-    else:
-        logging.getLogger("uvicorn.error").info("startup config=ok provider=%s rag=%s",
-                                               settings.llm_provider, settings.rag_enabled)
+    report = settings.configuration_report()
+    logging.getLogger("uvicorn.error").log(
+        logging.INFO if report["ready"] else logging.WARNING,
+        "startup profile=%s config_ready=%s missing=%s invalid=%s rag=%s",
+        report["profile"], report["ready"], report["missing"], report["invalid"], settings.rag_enabled,
+    )
     yield
 
 

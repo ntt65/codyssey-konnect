@@ -1,5 +1,6 @@
 from functools import cached_property
 from pathlib import Path
+from urllib.parse import urlsplit
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -45,11 +46,55 @@ class Settings(BaseSettings):
 
     @property
     def rag_enabled(self) -> bool:
-        return bool(self.supabase_db_url)
+        return bool(self.supabase_db_url.strip())
 
-    def missing_keys(self) -> list[str]:
-        required = ["openai_api_key", "supabase_url", "supabase_publishable_key", "supabase_secret_key"]
-        return [k for k in required if not getattr(self, k)]
+    def configuration_report(self, feature: str = "app") -> dict:
+        """Check presence and basic format only; never return values or call services.
+
+        app selects rag when a DB is configured, otherwise basic. Auth includes
+        the frontend public key; a secret/service-role key is not needed for JWKS.
+        """
+        profile = ("rag" if self.rag_enabled else "basic") if feature == "app" else feature
+        required = {
+            "basic": [],
+            "ingest": ["openai_api_key", "supabase_db_url"],
+            "rag": ["openai_api_key", "supabase_db_url"],
+            "llm": [],
+            "auth": ["supabase_url", "supabase_publishable_key"],
+        }
+        if profile not in required:
+            raise ValueError("Unknown configuration profile")
+        keys = list(required[profile])
+        invalid = []
+        if profile in {"rag", "llm"}:
+            if self.llm_provider == "openai":
+                keys += ["openai_api_key", "openai_model"]
+            elif self.llm_provider == "naito":
+                keys += ["naito_base_url", "naito_api_key", "naito_model"]
+            else:
+                invalid.append("llm_provider")
+        missing = [key for key in dict.fromkeys(keys) if not getattr(self, key).strip()]
+        for key in keys:
+            if key in missing:
+                continue
+            schemes = {
+                "supabase_db_url": {"postgres", "postgresql", "postgresql+psycopg2"},
+                "supabase_url": {"http", "https"}, "naito_base_url": {"http", "https"},
+            }.get(key)
+            if schemes:
+                try:
+                    url = urlsplit(getattr(self, key))
+                    valid = url.scheme in schemes and bool(url.hostname)
+                except ValueError:
+                    valid = False
+                if not valid:
+                    invalid.append(key)
+        return {"profile": profile, "ready": not missing and not invalid,
+                "missing": missing, "invalid": list(dict.fromkeys(invalid))}
+
+    def missing_keys(self, feature: str = "app") -> list[str]:
+        """Compatibility helper: names only; full diagnostics include invalid fields."""
+        return self.configuration_report(feature)["missing"]
 
 
 settings = Settings()

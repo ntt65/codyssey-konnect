@@ -127,7 +127,7 @@ PDF·Word 직접 적재, 파일 삭제·이름 변경에 따른 옛 출처 자�
 
 Naito 답변을 써도 현재 검색 임베딩은 OpenAI 키가 필요하다. Naito의 호환 여부·모델·토큰 배분은 제공 환경에서 확인한다. 장애 시 승인되지 않은 유료 제공자로 자동 전환하지 않는다.
 
-현재 `Settings.missing_keys()`와 `setup_dev.py`는 Auth 키까지 일괄 요구하는 오래된 기준이 남아 있다. 후속 수정 대상이며 이 경고만으로 RAG에 Auth 키가 필수라고 판단하지 않는다.
+`Settings.configuration_report()`·`/health`·`setup_dev.py`는 같은 기능별 설정 기준을 사용한다. 기본 `app`은 DB 설정이 있으면 `rag`, 없으면 키가 필요 없는 `basic`을 검사한다. `ingest`는 답변 제공자 키를 요구하지 않고, Naito의 `rag`는 OpenAI 임베딩 키도 검사한다. `auth`는 URL·프론트 공개 키를 확인하며 JWKS에 서비스 역할 시크릿을 요구하지 않는다. 누락·기본 URL 형식·미지원 제공자를 값 없이 진단하며 실제 연결 성공을 의미하지 않는다. 실행·프로필·종료코드는 README에서 관리한다.
 
 ## 6. 주제별 개발 절차
 
