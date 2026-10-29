@@ -1,5 +1,7 @@
 # 프레임워크 디렉터리 트리
 
+아래는 과거 scaffold 구상을 포함한 스냅샷이다. 현재 파일·개발 절차는 [framework.md](./framework.md)를 기준으로 확인하며 `konnect_study/` 등 모든 폴더가 존재한다고 가정하지 않는다.
+
 > 생성일: 2026-10-29 | 브랜치: full-framework
 > Core(항상 재사용) / Topic(주제마다 교체) / Doc(문서) 구분
 
@@ -10,8 +12,7 @@ codyssey-konnect/
 │   └── settings.json              [Doc] 하네스 설정 — git·테스트·서버 자동 허용
 │
 ├── framework_doc/                 [Doc] 프레임워크 설계·작업 문서
-│   ├── framework_design.md        [Doc] 설계 명세 (계층·기능·디렉터리·원칙)
-│   ├── framework_workflow.md      [Doc] 작업 절차 (계획→실행→검증→보완)
+│   ├── framework.md               [Doc] 현재 구조·설계·개발 절차·검증 기준
 │   ├── tree.md                    [Doc] 이 파일 — 디렉터리 구조
 │   ├── index.md                   [Doc] 순방향 인덱스 (파일 → 심볼)
 │   └── reverse_index.md           [Doc] 역방향 인덱스 (심볼 → 파일)
@@ -91,7 +92,7 @@ codyssey-konnect/
 
 | 태그 | 의미 |
 |---|---|
-| [Core] | 항상 포함. 수정 시 사용자 확인 필요 |
+| [Core] | 공통 계약·재사용 기능. 요청 범위의 수정은 영향과 검증을 확인하고 진행 |
 | [Topic] | 주제마다 교체. 자유롭게 작업 |
 | [Doc] | 문서·설정. 코드 아님 |
 | [Tool] | 개발 보조 스크립트·템플릿 |

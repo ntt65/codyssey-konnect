@@ -1,7 +1,7 @@
 # 기술 스택 상세
 
 > 각 기술의 역할·버전·공식 문서·프레임워크 내 사용 위치를 정리한다.
-> 설계 원칙: [framework_design.md](./framework_design.md) | 작업 절차: [framework_workflow.md](./framework_workflow.md)
+> 구조·계약·개발 절차: [framework.md](./framework.md)
 
 ---
 

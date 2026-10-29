@@ -5,13 +5,7 @@
 
 ## 실행
 
-저장소 루트에서 가상환경을 준비하고 의존성을 설치합니다.
-
-```powershell
-uv venv --python 3.12 .venv
-uv pip install --python .venv/Scripts/python.exe -r backend/requirements.txt
-Copy-Item .env.example .env
-```
+가상환경 설치·로컬 서버 실행·모의 테스트 명령은 [README](../README.md)를 따릅니다. 아래는 RAG 전용 설정과 자료 적재 안내입니다.
 
 기존 .env가 있다면 복사 대신 필요한 설정만 추가합니다.
 루트 .env에 아래 값을 설정합니다. 비밀값을 커밋하지 마세요.
@@ -26,12 +20,7 @@ Copy-Item .env.example .env
 Supabase Auth 설정은 이 RAG 데모의 질문 API에는 필요하지 않습니다.
 문서 적재는 관리자 CLI에서만 수행하며 웹 업로드 API는 제공하지 않습니다.
 
-```powershell
-.venv/Scripts/python.exe -m uvicorn app.main:app --app-dir backend --reload --port 8000
-```
-
-브라우저에서 http://localhost:8000 에 접속합니다. API 명세는 /docs입니다.
-별도 프론트 호스팅이면 rag.js에서 사용하는 공개 `window.RAG_API_BASE`를 모듈 로드 전에 설정하고 서버의 CORS 허용 주소를 맞춥니다.
+홈페이지·API 명세 주소는 README를 확인합니다. 별도 프론트 호스팅의 URL·CORS 설정은 [배포방법](./배포방법.md)에서 관리합니다.
 
 ## 나중에 자료 추가
 
@@ -39,9 +28,9 @@ Supabase Auth 설정은 이 RAG 데모의 질문 API에는 필요하지 않습�
 2. 저장소 루트에서 아래 명령을 실행합니다.
 
 ```powershell
-.venv/Scripts/python.exe utils/scripts/ingest_rag.py
+uv run --no-project --python .venv python utils/scripts/ingest_rag.py
 # 다른 폴더 사용
-.venv/Scripts/python.exe utils/scripts/ingest_rag.py "D:/my documents"
+uv run --no-project --python .venv python utils/scripts/ingest_rag.py "D:/my documents"
 ```
 
 PDF·Word는 텍스트 또는 Markdown으로 변환한 뒤 넣습니다.
@@ -67,12 +56,6 @@ grounded는 검색 근거가 제공됐다는 의미이며, 답변의 모든 문�
 화면의 대화 기록은 브라우저 메모리에만 있고, 각 질문은 독립적으로 검색합니다.
 현재는 공개 데모 API입니다. 실제 서비스 공개 전 인증·사용량 제한 정책을 앱에 맞게 적용해야 합니다.
 
-테스트는 가짜 DB/LLM으로 외부 비용 없이 실행합니다.
-
-```powershell
-uv pip install --python .venv/Scripts/python.exe pytest pytest-asyncio
-cd backend
-../.venv/Scripts/python.exe -m pytest tests/core tests/test_rag.py -q
-```
+모의 테스트는 [README](../README.md)의 전체 테스트 명령을 사용합니다. 외부 DB·LLM 비용 없이 검증하며 실제 연결 성공과 구분합니다.
 
 실제 연결 검증은 키 설정 → 자료 적재 → 답이 있는 질문/없는 질문을 보내 출처를 확인하는 순서입니다.
