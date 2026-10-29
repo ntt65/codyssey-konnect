@@ -54,8 +54,15 @@ node --test tests/frontend/http.test.mjs
 
 ## 문서
 
+Codex는 루트 `AGENTS.md`, Claude Code와 Gemini CLI는 각각 `CLAUDE.md`·`GEMINI.md`에서 같은 파일을 import합니다. 공통 규칙을 수정할 때는 `AGENTS.md`만 바꿉니다.
+
+팀원은 저장소 루트에서 새 세션을 시작한 뒤 적용된 지침 경로·로컬 커밋 규칙·병합 보류 상태를 확인하세요. Claude는 `/memory`에서 파일을, Gemini는 `/memory show`에서 가져온 내용을 확인합니다. Codex에는 적용한 지침 파일을 요약하도록 요청합니다. 여기서는 import 경로·형식만 확인했으며 각 도구의 로그인된 세션 실행은 아직 검증하지 않았습니다.
+
+공식 동작: [Codex AGENTS](https://learn.chatgpt.com/docs/agent-configuration/agents-md), [Claude imports](https://code.claude.com/docs/en/memory), [Gemini context imports](https://geminicli.com/docs/cli/gemini-md/).
+
 | 문서 | 용도 |
 |---|---|
+| [AGENTS.md](AGENTS.md) | 도구와 무관한 팀 공통 개발 규칙 |
 | [framework.md](framework_doc/framework.md) | 구조·계약·개발 절차·오류 처리·검증 |
 | [RAG 안내](framework_doc/rag_guide.md) | 자료 적재·컬렉션·출처 확인 |
 | [배포방법](framework_doc/배포방법.md) | Render·Vercel·URL·CORS |
